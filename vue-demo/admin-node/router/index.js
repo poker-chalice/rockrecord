@@ -4,6 +4,8 @@ const userRouter = require('./user')
 const {
     CODE_ERROR
 } = require('../utils/constant')
+const jwtAuth = require('./jwt')
+const Result = require('../models/Result')
 
 // 注册路由
 const router = express.Router()
@@ -12,8 +14,9 @@ router.get('/', function (req, res) {
     res.send('欢迎进入磐岩记录管理后台')
 })
 
-// 通过 userRouter 来处理 /user 路由，对路由处理进行解耦
-router.use('./user', userRouter)
+router.use(jwtAuth)
+// 通过 userRouter 来处理 /user 路由，对路由处理进行解耦 
+router.use('/user', userRouter)
 
 /**
  * 集中处理404请求的中间件
@@ -31,15 +34,26 @@ router.use((req, res, next) => {
  * 第二，方法的必须放在路由最后
  */
 router.use((err, req, res, next) => {
-    const msg = (err && err.message) || '系统错误'
-    const statusCode = (err.output && err.output.statusCode) || 500;
-    const errorMsg = (err.output && err.output.payload && err.output.payload.error) || err.message
-    res.status(statusCode).json({
-        code: CODE_ERROR,
-        msg,
-        error: statusCode,
-        errorMsg
-    })
+    console.log(555555)
+    if (err.name === 'UnauthorizedError') {
+        console.log(err)
+        const { status = 401, message } = err
+        new Result(null, 'Token验证失败', {
+            error: status,
+            errorMsg: message
+        }).jwtError(res.status(status))
+    } else {
+        const msg = (err && err.message) || '系统错误'
+        const statusCode = (err.output && err.output.statusCode) || 500;
+        const errorMsg = (err.output && err.output.payload && err.output.payload.error) || err.message
+        res.status(statusCode).json({
+            code: CODE_ERROR,
+            msg,
+            error: statusCode,
+            errorMsg
+        })
+    }
+
 })
 
 module.exports = router

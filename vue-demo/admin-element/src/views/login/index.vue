@@ -21,7 +21,7 @@
         />
       </el-form-item>
 
-      <el-tooltip v-model="capsTooltip" content="Caps lock is On" placement="right" manual>
+      <el-tooltip v-model="capsTooltip" content="键盘大写锁定启动" placement="right" manual>
         <el-form-item prop="password">
           <span class="svg-container">
             <svg-icon icon-class="password" />
@@ -127,7 +127,6 @@ export default {
       }else{
         this.capsTooltip = false
       }
-      // this.capsTooltip = key && key.length === 1 && (key >= 'A' && key <= 'Z')
 
       //大小写判断
       if( key === 'CapsLock' && this.capsTooltip === true ){
